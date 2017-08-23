@@ -3,6 +3,8 @@ package ionel.exemplu1;
 
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
 */
@@ -17,28 +19,28 @@ public class DemoDB {
 
     public static void main(String[] args) {
         System.out.println("Hello database users! We are going to call DB from Java");
-        try {
-            //demo CRUD operations
-             demoCreate();
-
-             demoUpdate();
-            demoDelete();
-            demoRead();
-
-            // demoBlobInsert();
-            // demoBlobRead();
-
-
-
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            //demo CRUD operations
+//             demoCreate();
+//
+//             demoUpdate();
+//            demoDelete();
+//            demoRead();
+//
+//            // demoBlobInsert();
+//            // demoBlobRead();
+//
+//
+//
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
 
     }
 
-    private static void demoCreate() throws ClassNotFoundException, SQLException {
+    public static void demoCreate(String nume, String telefon) throws ClassNotFoundException, SQLException {
 
         // 1. load driver, no longer needed in new versions of JDBC
         Class.forName("org.postgresql.Driver");
@@ -49,9 +51,9 @@ public class DemoDB {
         Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
 
         // 4. create a query statement
-        PreparedStatement pSt = conn.prepareStatement("INSERT INTO agenda (nume, prenume) VALUES (?,?)");
-        pSt.setString(1, "achim");
-        pSt.setString(2, "david");
+        PreparedStatement pSt = conn.prepareStatement("INSERT INTO agenda (nume, telefon) VALUES (?,?)");
+        pSt.setString(1, nume);
+        pSt.setString(2, telefon);
 
         // 5. execute a prepared statement
         int rowsInserted = pSt.executeUpdate();
@@ -61,15 +63,9 @@ public class DemoDB {
         conn.close();
     }
 
-    private static void demoRead() throws ClassNotFoundException, SQLException {
+    public static List<Persoana> demoRead() throws ClassNotFoundException, SQLException {
         // 1. load driver, no longer needed in new versions of JDBC
         Class.forName("org.postgresql.Driver");
-
-
-        String startsWith = "ion";
-
-
-
 
         // 3. obtain a connection
         Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
@@ -77,25 +73,29 @@ public class DemoDB {
         // 4. create a query statement
         Statement st = conn.createStatement();
 
-        String query="SELECT * FROM agenda";
+        String query="SELECT * FROM agenda order by nume asc";
         System.out.println(query);
         // 5. execute a query
         ResultSet rs = st.executeQuery(query);
 
         // 6. iterate the result set and print the values
+
+        List listaDePersoane = new ArrayList<Persoana>();
         while (rs.next()) {
-            System.out.print(rs.getString("nume").trim());
-            System.out.print("---");
-            String pwd= rs.getString("prenume");
-            if(pwd!=null)
-                System.out.print(pwd.trim());
-            System.out.println("-");
+            String nume = rs.getString("nume").trim();
+            String telefon = rs.getString("telefon").trim();
+            Persoana p = new Persoana();
+            p.nume=nume;
+            p.telefon=telefon;
+            listaDePersoane.add(p);
+
         }
 
         // 7. close the objects
         rs.close();
         st.close();
         conn.close();
+        return listaDePersoane;
     }
 
     private static void demoUpdate() throws ClassNotFoundException, SQLException {
@@ -123,7 +123,7 @@ public class DemoDB {
     }
 
 
-    private static void demoDelete() throws ClassNotFoundException, SQLException {
+    public static void demoDelete(long id) throws ClassNotFoundException, SQLException {
 
         // 1. load driver, no longer needed in new versions of JDBC
         Class.forName("org.postgresql.Driver");
@@ -135,7 +135,7 @@ public class DemoDB {
 
         // 4. create a query statement
         PreparedStatement pSt = conn.prepareStatement("DELETE FROM agenda WHERE id=?");
-        pSt.setLong(1, 1);
+        pSt.setLong(1, id);
 
         // 5. execute a prepared statement
         int rowsDeleted = pSt.executeUpdate();

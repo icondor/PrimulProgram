@@ -1,5 +1,8 @@
 package ionel.exemplu1;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class AgendaDeNume {
@@ -35,13 +38,21 @@ public class AgendaDeNume {
 
     public static void afisare() {
         System.out.println("Continut agenda mea:");
-        for(int i=0;i<agenda.length;i++) {
-             if(agenda[i]!=null) {
-                 Persoana p = agenda[i]; // iau din agenda si pun in p
-                 System.out.println(p.nume+":"+p.telefon);
-             }
 
+        List myList = new ArrayList<Persoana>();
+        try {
+            myList= DemoDB.demoRead(); // apel db
+            for(int i=0;i<myList.size();i++) { // iteratie , parcurgere
+                Persoana p = (Persoana)myList.get(i);
+                System.out.println(p.nume+":"+p.telefon);
+            }
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
     }
 
     public static void adaugare() {
@@ -56,8 +67,13 @@ public class AgendaDeNume {
         Persoana p = new Persoana(); // se naster persoana
         p.nume=n;
         p.telefon=t;
-        agenda[pozitie]=p; // pun persoana in agenda
-        pozitie++;
+        try {
+            DemoDB.demoCreate(p.nume, p.telefon);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void stergere() {
@@ -65,21 +81,17 @@ public class AgendaDeNume {
         // citesc un nume
         // il caut in agenda
         // daca exista pe pozitia lui pun ""
-        String nume;
+        long id;
         System.out.println("pe cine stergi? ");
         Scanner sc = new Scanner(System.in);
-        nume=sc.nextLine();
-
-        for(int i=0;i<agenda.length;i++) {
-            if(agenda[i]!=null)
-            if(nume.equals(agenda[i].nume)) {
-               agenda[i]=null;
-                System.out.println("am sters-o");
-            }
-
+        id=sc.nextLong();
+        try {
+            DemoDB.demoDelete(id);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
-
 
 
     }
